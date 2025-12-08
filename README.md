@@ -1,161 +1,149 @@
-# Theatre Ticket Booking System
+# Cinema Booking System – Flask + MySQL
 
-This project is a complete Theatre Ticket Booking System built using Python (Flask) and MySQL. It includes separate login portals for managers and cashiers, show scheduling, dynamic seat availability, movie management, pricing control, and automated ticket booking. All backend logic, including querying, seat allocation, and ticket generation, is handled through Flask and MySQL queries.
-
-Core project information, including database name and default credentials, is defined in **01 LOGIN DETAILS & PROJECT INFO.txt** :contentReference[oaicite:0]{index=0}.  
-All application logic, routing, SQL queries, and booking workflows are implemented in **app.py** :contentReference[oaicite:1]{index=1}.
+This is a cinema ticket booking system built using Flask and MySQL. It includes interfaces for both the cashier and the manager, handling movie scheduling, pricing, seat availability, and ticket generation. The application uses Flask routes for server-side rendering and executes SQL queries to manage movies, shows, halls, bookings, and pricing.
 
 ---
 
 ## Features
 
-### Authentication
-- Manager and Cashier login pages  
-- Credential verification through Flask routes  
-- Redirects to respective dashboards upon successful login
+### Cashier
+- View movies scheduled on a selected date  
+- View available showtimes  
+- Select available seats  
+- Book tickets and generate ticket numbers  
+- View real-time seat availability (gold and standard)
 
-### Cashier Functions
-- Search movies showing on a selected date  
-- View available time slots for each movie  
-- Retrieve show ID  
-- Display available seats (gold and standard)  
-- Dynamic seat disabling for booked seats  
-- Calculate ticket price based on seat class  
-- Confirm seat bookings and generate ticket numbers
+### Manager
+- Add new movies  
+- Schedule shows  
+- View and modify pricing  
+- View booked tickets per show  
+- Check hall availability based on schedule and movie duration  
 
-### Manager Functions
-- View all shows scheduled for a selected date  
-- Retrieve booked tickets per show  
-- Insert new movies with validation to avoid duplicates  
-- Assign movie types (up to 3 types)  
-- Validate movies available for a specific date  
-- Check hall availability based on duration and schedule  
-- Insert new shows into the database  
-- View and modify pricing structure
-
-### Database Integration
-- Uses MySQL with stored procedures (example: `delete_old()`)  
-- Automated cleanup of outdated data  
-- Real-time query execution through `runQuery()` wrapper
-
-### Ticket Handling
-- Generates unique ticket numbers  
-- Books seats by inserting into `booked_tickets`  
-- Supports gold and standard seat numbering formats
-
-### Technology Stack
-- Python 3.x  
-- Flask  
-- MySQL  
-- HTML Templates (Jinja2)  
-- Stored Procedures and SQL Queries
+### Backend
+- Flask-based routing  
+- MySQL database integration  
+- Query wrapper for handling SQL operations  
+- Random ticket number generation  
+- Automatic removal of old bookings using stored procedures  
 
 ---
 
-## Project Structure
+## Running the Application Locally
 
+### 1. Install dependencies
 ```
-/project
-│── app.py
-│── templates/
-│     ├── login.html
-│     ├── cashier.html
-│     ├── manager.html
-│     ├── movies.html
-│     ├── timings.html
-│     ├── seating.html
-│     ├── shows.html
-│     ├── bookedtickets.html
-│     ├── movieform.html
-│     ├── validmovies.html
-│     ├── availablehalls.html
-│     └── other HTML templates
-│── static/
-│── 01 LOGIN DETAILS & PROJECT INFO.txt
-└── README.md
+pip install -r requirements.txt
 ```
 
----
-
-## Default Login Credentials
-
-From **01 LOGIN DETAILS & PROJECT INFO.txt** :contentReference[oaicite:2]{index=2}:
-
-**Manager Login**  
-- Username: `manager`  
-- Password: `Password@123`  
-
-**Cashier Login**  
-- Username: `cashier`  
-- Password: `cashier123`  
-
-Database name: **dbtheatre**
-
----
-
-## Prerequisites
-
-- Python 3.x  
-- MySQL Server  
-- pip package manager  
-
-Install required libraries:
-
-```bash
-pip install flask mysql-connector-python
+### 2. Start the Flask development server
 ```
-
----
-
-## Running the Application
-
-1. Import the database structure into MySQL (db name: `dbtheatre`).  
-2. Ensure MySQL is running locally.  
-3. Update MySQL username/password inside `runQuery()` in `app.py` if needed.  
-4. Start the Flask server:
-
-```bash
 python app.py
 ```
 
-5. Open the application in your browser:
+When running locally, Flask displays:
+```
+WARNING: This is a development server. Do not use it in a production deployment.
+```
 
+This warning is normal. Flask's built-in server is intended only for local testing.  
+In production, a WSGI server such as **Gunicorn** must be used (see deployment section).
+
+### 3. Access the application
+Open the URL shown in your console:
+
+```
+http://127.0.0.1:5000
+```
+or  
 ```
 http://localhost:5000
 ```
 
 ---
 
-## How the System Works
+## Deployment (Render)
 
-### Seat Allocation Logic
-- Gold seats use seat numbers above 1000  
-- Standard seats use normal numbering  
-- Booked seats populate dynamically into the seating layout via template rendering
+This project is deployable using **Render Web Services**.
 
-### Show Scheduling Logic
-- Calculates movie end times using duration  
-- Checks hall availability by comparing overlapping schedules  
-- Rejects conflicting showtimes
+### Required Additional Files
 
-### Price Management
-- Prices defined in `price_listing` table  
-- Manager can update prices dynamically  
-- Gold seat price is automatically set to 1.5× the standard rate
+#### `requirements.txt`
+```
+Flask
+mysql-connector-python
+gunicorn
+```
+
+#### `Procfile`
+```
+web: gunicorn app:app
+```
+
+### Steps to Deploy
+
+1. Push your project to a GitHub repository.  
+2. Go to https://render.com and create a new account or sign in using GitHub.  
+3. Select **New > Web Service**.  
+4. Connect your GitHub repository.  
+5. Configure the service:
+   - Environment: Python 3
+   - Build Command:
+     ```
+     pip install -r requirements.txt
+     ```
+   - Start Command:
+     ```
+     gunicorn app:app
+     ```
+
+6. Add environment variables for your MySQL connection:
+   - `DB_HOST`  
+   - `DB_USER`  
+   - `DB_PASS`  
+   - `DB_NAME`  
+
+7. Click **Create Web Service**.
+
+Render will deploy the project using **Gunicorn**, which replaces the Flask development server shown locally.
 
 ---
 
-## Future Improvements
+## Project Structure
 
-- Admin dashboard UI improvements  
-- Exportable booking reports  
-- Email or SMS ticket confirmation  
-- WebSocket real-time seat updates  
-- Role-based user accounts in database rather than hardcoded
+```
+cinema-booking/
+│── app.py
+│── requirements.txt
+│── Procfile
+│── templates/
+│      ├── login.html
+│      ├── cashier.html
+│      ├── manager.html
+│      ├── movies.html
+│      ├── timings.html
+│      ├── seating.html
+│      ├── bookedtickets.html
+│      ├── movieform.html
+│      ├── validmovies.html
+│      └── availablehalls.html
+│── static/
+│      ├── css/
+│      ├── js/
+│      └── images/
+└── README.md
+```
 
 ---
 
-## Credits
+## Notes
 
-This project is based on the structure described in **01 LOGIN DETAILS & PROJECT INFO.txt** :contentReference[oaicite:3]{index=3} and implemented through Flask using the logic contained in **app.py** :contentReference[oaicite:4]{index=4}.
+- The built-in Flask server shown during local testing is expected and safe during development.  
+- For production, always use a WSGI server such as **Gunicorn**, which is already configured for Render.  
+- MySQL must be hosted on an external service; local MySQL cannot be used on Render.
 
+---
+
+## License
+
+This project is for educational and demonstration purposes.  
